@@ -1,0 +1,22 @@
+#include <behaviors.dtsi>
+#include <dt-bindings/zmk/keys.h>
+#include <dt-bindings/zmk/pointing.h>
+
+/ {
+    keymap {
+        compatible = "zmk,keymap";
+
+        default_layer {
+            bindings = <
+                &kp RIGHT      // 0: 右矢印
+                &kp UP         // 1: ホイール上
+                &mkp MB3       // 2: ホイール中
+                &kp LEFT       // 3: 左矢印
+                &kp DOWN       // 4: ホイール下
+                &mkp MB1       // 5: Lボタン
+            >;
+
+            sensor-bindings = <&inc_dec_kp MMSCL_UP MMSCL_DOWN>;
+        };
+    };
+};
