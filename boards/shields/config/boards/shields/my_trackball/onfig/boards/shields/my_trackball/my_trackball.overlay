@@ -1,1 +1,73 @@
+#include <dt-bindings/zmk/matrix_transform.h>
 
+/ {
+    chosen {
+        zmk,kscan = &kscan0;
+        zmk,matrix_transform = &default_transform;
+        zmk,battery = &vbatt;
+    };
+
+    vbatt: vbatt {
+        compatible = "zmk,battery-voltage-divider";
+        io-channels = <&adc 2>;
+        output-ohms = <2000000>;
+        full-ohms = <(2000000 + 2000000)>;
+    };
+
+    /* ボタン（Direct GPIO）を1行10列のキーマトリクスとして扱う定義 */
+    kscan0: kscan_0 {
+        compatible = "zmk,kscan-gpio-direct";
+        wakeup-source;
+        input-gpios
+            = <&pro_micro 3 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>  // 0: 右矢印 (D3)
+            , <&pro_micro 2 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>  // 1: ホイール上 (D2)
+            , <&pro_micro 0 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>  // 2: ホイール中 (D0)
+            , <&pro_micro 7 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>  // 3: 左矢印 (D7)
+            , <&pro_micro 6 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>  // 4: ホイール下 (D6)
+            , <&pro_micro 5 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>  // 5: Lボタン (D5)
+            // ※残り4ボタン（R, Fn1〜3）のピンが決まったらここに追加します
+            ;
+    };
+
+    default_transform: keymap_transform_0 {
+        compatible = "zmk,matrix-transform";
+        columns = <6>; // 現在のボタン数（全10個にする場合は10に変更）
+        rows = <1>;
+        map = <RC(0,0) RC(0,1) RC(0,2) RC(0,3) RC(0,4) RC(0,5)>;
+    };
+
+    /* ロータリーエンコーダー */
+    encoder: encoder {
+        compatible = "rotary-encoder";
+        status = "okay";
+        gpios = <&pro_micro 1 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>,
+                <&pro_micro 4 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
+        steps = <24>;
+    };
+
+    sensors: sensors {
+        compatible = "zmk,keymap-sensors";
+        sensors = <&encoder>;
+    };
+};
+
+/* SPI・PMW3320センサー定義 */
+&pro_micro_spi {
+    status = "okay";
+    cs-gpios = <&pro_micro 19 GPIO_ACTIVE_LOW>;
+
+    pmw3320: pmw3320@0 {
+        compatible = "pixart,pmw3320";
+        reg = <0>;
+        spi-max-frequency = <2000000>;
+        irq-gpios = <&pro_micro 20 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+        status = "okay";
+    };
+};
+
+/ {
+    trackball_listener {
+        compatible = "zmk,input-listener";
+        device = <&pmw3320>;
+    };
+};
