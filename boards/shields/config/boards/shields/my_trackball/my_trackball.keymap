@@ -16,7 +16,7 @@
                 &mkp MB1       // 5: Lボタン
             >;
 
-            sensor-bindings = <&inc_dec_kp MMSCL_UP MMSCL_DOWN>;
+            sensor-bindings = <&inc_dec_kp SCRL_UP SCRL_DOWN>;
         };
     };
 };
